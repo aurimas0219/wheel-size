@@ -1,8 +1,8 @@
 {
-    "name": "nfq/wheel-size-api",
-    "description": "Boilerplate package for creating other packages.",
-    "keywords": ["wheel size api", "tires size api", "rims size api", "package"],
-    "license": "NFQ",
+    "name": "aurimas0219/wheel-size",
+    "description": "Wheel size api",
+    "keywords": ["wheel size api", "package"],
+    "license": "proprietary",
     "authors": [
         {
             "name": "Aurimas Valancius",

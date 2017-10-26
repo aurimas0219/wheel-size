@@ -1,0 +1,24 @@
+{
+    "name": "nfq/wheel-size-api",
+    "description": "Boilerplate package for creating other packages.",
+    "keywords": ["wheel size api", "tires size api", "rims size api", "package"],
+    "license": "NFQ",
+    "authors": [
+        {
+            "name": "Aurimas Valancius",
+            "email": "aurimas.valancius@nfq.lt"
+        }
+    ],
+    "type": "project",
+    "require": {
+		"php": ">=5.4"
+    },
+	"require-dev": {
+		"phpunit/phpunit": "5.2.*"
+    },
+	"autoload": {
+        "psr-4": {
+            "Nfq\\WheelSize\\": "src/"
+        }
+    }
+}

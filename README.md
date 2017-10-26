@@ -1,0 +1,1 @@
+Run test : vendor/bin/phpunit

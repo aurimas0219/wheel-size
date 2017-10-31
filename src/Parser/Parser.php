@@ -56,7 +56,7 @@ class Parser
                     $key = $wheel->front->tire_width . $wheel->front->tire_aspect_ratio . $wheel->front->rim_diameter;
 
                     $results[] = [
-                        'name' => $wheel->front->rim_diameter . $wheel->front->tire_construction,
+                        'name' => $wheel->front->rim_diameter . $wheel->front->tire_construction . ' (' .$wheel->front->tire  .')',
                         'slug' => $key,
                     ];
                 }

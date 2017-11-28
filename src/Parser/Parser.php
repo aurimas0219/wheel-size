@@ -55,14 +55,28 @@ class Parser
                 foreach ($item->wheels as $wheel) {
                     $key = $wheel->front->tire_width . $wheel->front->tire_aspect_ratio . $wheel->front->rim_diameter;
 
-                    $results[] = [
+                    $results['front'][$key] = [
                         'name' => $wheel->front->rim_diameter . $wheel->front->tire_construction . ' (' .$wheel->front->tire  .')',
                         'slug' => $key,
                     ];
+                    if ($wheel->rear) {
+                        $key = $wheel->rear->tire_width . $wheel->rear->tire_aspect_ratio . $wheel->rear->rim_diameter;
+                        if ($key) {
+                            $results['back'][$key] = [
+                                'name' => $wheel->rear->rim_diameter . $wheel->rear->tire_construction . ' (' . $wheel->rear->tire . ')',
+                                'slug' => $key,
+                            ];
+                        }
+                    }
                 }
             }
         }
 
-        return $results;
+        $rims['front'] = array_values($results['front']);
+        if ($results['back']) {
+            $rims['back'] = array_values($results['back']);
+        }
+
+        return $rims;
     }
 }

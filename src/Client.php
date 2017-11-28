@@ -148,8 +148,10 @@ class Client
         if ($this->cacheProvider && $this->cacheProvider->has($key)) {
             return $this->cacheProvider->get($key);
         }
+        $data = $this->parser->extractYears($this->getModelsDetails($manufacturer, $model));
+        $this->cacheProvider->set($key, $data);
 
-        return $this->parser->extractYears($this->getModelsDetails($manufacturer, $model));
+        return $data;
     }
 
     /**
@@ -166,8 +168,11 @@ class Client
         if ($this->cacheProvider && $this->cacheProvider->has($key)) {
             return $this->cacheProvider->get($key);
         }
+        $data = $this->parser->extractEngines($this->searchByModel($manufacturer, $model, $year));
+        $this->cacheProvider->set($key, $data);
 
-        return $this->parser->extractEngines($this->searchByModel($manufacturer, $model, $year));
+        return $data;
+
     }
 
     /**
@@ -180,13 +185,15 @@ class Client
      */
     public function getModelTires($manufacturer, $model, $year, $engine)
     {
-        $key = self::TIRES_CACHE_KEY . $manufacturer . '_' . $model;
+        $key = self::TIRES_CACHE_KEY . $manufacturer . '_' . $model . '_' . $year . '_' . $engine;
 
         if ($this->cacheProvider && $this->cacheProvider->has($key)) {
             return $this->cacheProvider->get($key);
         }
+        $data = $this->parser->extractRims($this->searchByModel($manufacturer, $model, $year), $engine);
+        $this->cacheProvider->set($key, $data);
 
-        return $this->parser->extractRims($this->searchByModel($manufacturer, $model, $year), $engine);
+        return $data;
     }
 
     /**

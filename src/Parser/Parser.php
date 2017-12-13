@@ -15,7 +15,10 @@ class Parser
     public function extractYears($data)
     {
         if ($data instanceof \stdClass && isset($data->years)) {
-            return $data->years;
+            $years = $data->years;
+            rsort($years);
+
+            return $years;
         }
 
         return [];
@@ -31,7 +34,7 @@ class Parser
 
         /** @var \stdClass $item */
         foreach ($data as $item) {
-            $results[] = [
+            $results[$item->market->abbr][] = [
                 'slug' => $item->trim,
                 'name' => $item->trim . ' (' . $item->power->kW . ' kW)'
             ];
@@ -54,29 +57,21 @@ class Parser
             if ($item->trim == $trim) {
                 foreach ($item->wheels as $wheel) {
                     $key = $wheel->front->tire_width . $wheel->front->tire_aspect_ratio . $wheel->front->rim_diameter;
+                    $name = $wheel->front->tire;
 
-                    $results['front'][$key] = [
-                        'name' => $wheel->front->rim_diameter . $wheel->front->tire_construction . ' (' .$wheel->front->tire  .')',
+                    if ($wheel->rear && $wheel->rear->tire_width) {
+                        $key .= '__' . $wheel->rear->tire_width . $wheel->rear->tire_aspect_ratio . $wheel->rear->rim_diameter;
+                        $name .= ' / ' . $wheel->rear->tire;
+                    }
+
+                    $results[$key] = [
+                        'name' => $name,
                         'slug' => $key,
                     ];
-                    if ($wheel->rear) {
-                        $key = $wheel->rear->tire_width . $wheel->rear->tire_aspect_ratio . $wheel->rear->rim_diameter;
-                        if ($key) {
-                            $results['back'][$key] = [
-                                'name' => $wheel->rear->rim_diameter . $wheel->rear->tire_construction . ' (' . $wheel->rear->tire . ')',
-                                'slug' => $key,
-                            ];
-                        }
-                    }
                 }
             }
         }
 
-        $rims['front'] = array_values($results['front']);
-        if ($results['back']) {
-            $rims['back'] = array_values($results['back']);
-        }
-
-        return $rims;
+        return array_values($results);
     }
 }

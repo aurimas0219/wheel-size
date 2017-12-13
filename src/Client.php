@@ -164,7 +164,6 @@ class Client
     public function getModelEngines($manufacturer, $model, $year)
     {
         $key = self::ENGINE_CACHE_KEY . $manufacturer . '_' . $model;
-
         if ($this->cacheProvider && $this->cacheProvider->has($key)) {
             return $this->cacheProvider->get($key);
         }

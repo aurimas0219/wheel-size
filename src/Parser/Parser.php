@@ -45,16 +45,16 @@ class Parser
 
     /**
      * @param \stdClass $data
-     * @param string $trim
+     * @param string $engine
      * @return array
      */
-    public function extractRims($data, $trim)
+    public function extractRims($data, $engine = '')
     {
         $results = [];
 
         /** @var \stdClass $item */
         foreach ($data as $item) {
-            if ($item->trim == $trim) {
+            if ($item->trim == $engine || $engine == '') {
                 foreach ($item->wheels as $wheel) {
                     $key = $wheel->front->tire_width . $wheel->front->tire_aspect_ratio . $wheel->front->rim_diameter;
                     $name = $wheel->front->tire;
@@ -66,7 +66,8 @@ class Parser
 
                     $results[$key] = [
                         'name' => $name,
-                        'slug' => $key,
+                        'slug'  => $key,
+                        'isMain' => $wheel->is_stock
                     ];
                 }
             }

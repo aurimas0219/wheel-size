@@ -165,13 +165,24 @@ class Client
     {
         $key = self::ENGINE_CACHE_KEY . $manufacturer . '_' . $model;
         if ($this->cacheProvider && $this->cacheProvider->has($key)) {
-            return $this->cacheProvider->get($key);
+            $data =  $this->cacheProvider->get($key);
+        } else {
+            $data = $this->parser->extractEngines($this->searchByModel($manufacturer, $model, $year));
+            $this->cacheProvider->set($key, $data);
         }
-        $data = $this->parser->extractEngines($this->searchByModel($manufacturer, $model, $year));
-        $this->cacheProvider->set($key, $data);
 
-        return $data;
+        $tiresKey = self::TIRES_CACHE_KEY . $manufacturer . '_' . $model . '_' . $year . '_';
+        if ($this->cacheProvider && $this->cacheProvider->has($tiresKey)) {
+            $tiresData =  $this->cacheProvider->get($tiresKey);
+        } else {
+            $tiresData = $this->parser->extractRims($this->searchByModel($manufacturer, $model, $year));
+            $this->cacheProvider->set($tiresKey, $tiresData);
+        }
 
+        return [
+            'engines' => $data,
+            'tires' => $tiresData
+        ];
     }
 
     /**
@@ -182,7 +193,7 @@ class Client
      *
      * @return array
      */
-    public function getModelTires($manufacturer, $model, $year, $engine)
+    public function getModelTires($manufacturer, $model, $year, $engine = '')
     {
         $key = self::TIRES_CACHE_KEY . $manufacturer . '_' . $model . '_' . $year . '_' . $engine;
 

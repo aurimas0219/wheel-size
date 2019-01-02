@@ -125,15 +125,10 @@ class Client
      */
     protected function getData($cacheKey, $endpoint, $force = false)
     {
-        $key = self::CACHE_PREFIX . $cacheKey;
-        if ($force === false && $this->cacheProvider && $this->cacheProvider->has($key)) {
-            return $this->cacheProvider->get($key);
-        } else {
-            $data = $this->request($endpoint);
-            $this->cacheProvider->set($key, $data);
+        $data = $this->request($endpoint);
+        $this->cacheProvider->set($key, $data);
 
-            return $data;
-        }
+        return $data;
     }
 
     /**

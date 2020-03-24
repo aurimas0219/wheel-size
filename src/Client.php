@@ -7,61 +7,67 @@ use Nfq\WheelSize\Parser\Parser;
 
 /**
  * Class Client
+ *
  * @package Nfq\WheelSize
  */
 class Client
 {
-    const CACHE_PREFIX = 'wheel_size_client_';
     const MANUFACTURERS_CACHE_KEY = 'manufacturers';
     const MANUFACTURERS_MODEL_CACHE_KEY = 'models_';
     const SEARCH_MODEL_CACHE_KEY = 'search_models_';
     const TIRES_CACHE_KEY = 'tires_';
     const ENGINE_CACHE_KEY = 'engines_';
-    const YEARS_CACHE_KEY = 'years_';
 
-    /** @var string */
-    private $apiEndpoint = 'https://api.wheel-size.com/v1/';
-
-    /** @var  CacheInterface */
+    /**
+     * @var  CacheInterface
+     */
     private $cacheProvider;
 
-    /** @var  string */
-    private $key;
-
-    /** @var  Parser */
+    /**
+     * @var  Parser
+     */
     private $parser;
 
     /**
-     * WheelSizeClient constructor.
-     * @param string $key
-     * @param CacheInterface $cacheProvider
+     * @var RequestFormatter
      */
-    public function __construct($key, CacheInterface $cacheProvider = null)
+    private $requestFormatter;
+
+    /**
+     * Client constructor.
+     *
+     * @param CacheInterface   $cacheProvider
+     * @param Parser           $parser
+     * @param RequestFormatter $requestFormatter
+     */
+    public function __construct(CacheInterface $cacheProvider, Parser $parser, RequestFormatter $requestFormatter)
     {
-        $this->key = $key;
         $this->cacheProvider = $cacheProvider;
-        $this->parser = new Parser();
+        $this->parser = $parser;
+        $this->requestFormatter = $requestFormatter;
     }
 
     /**
      * @param bool $force
+     *
      * @return array
      */
     public function getManufacturers($force = false)
     {
-        $endpoint = $this->apiEndpoint . 'makes/' . '?' . $this->getUserKey();
+        $endpoint = $this->requestFormatter->getManufacturersUrl();
 
         return $this->getData(self::MANUFACTURERS_CACHE_KEY, $endpoint, $force);
     }
 
     /**
      * @param string $slug
-     * @param bool $force
+     * @param bool   $force
+     *
      * @return array
      */
     public function getManufacturersModels($slug, $force = false)
     {
-        $endpoint = $this->apiEndpoint . 'models/?make=' . $slug . '&' . $this->getUserKey();
+        $endpoint = $this->requestFormatter->getManufacturersModelsUrl($slug);
         $key = self::MANUFACTURERS_MODEL_CACHE_KEY . $slug;
 
         return $this->getData($key, $endpoint, $force);
@@ -70,12 +76,13 @@ class Client
     /**
      * @param string $manufacturerSlug
      * @param string $modelSlug
-     * @param bool $force
+     * @param bool   $force
+     *
      * @return \stdClass
      */
     public function getModelsDetails($manufacturerSlug, $modelSlug, $force = false)
     {
-        $endpoint = $this->apiEndpoint . "models/{$manufacturerSlug}/{$modelSlug}/" . '?' . $this->getUserKey();
+        $endpoint = $this->requestFormatter->getModelsDetailsUrl($manufacturerSlug, $modelSlug);
         $key = self::MANUFACTURERS_MODEL_CACHE_KEY . $manufacturerSlug . '_' . $modelSlug;
 
         return $this->getData($key, $endpoint, $force);
@@ -87,13 +94,13 @@ class Client
      * @param string $manufacturerSlug
      * @param string $modelSlug
      * @param string $year
-     * @param bool $force
+     * @param bool   $force
+     *
      * @return \stdClass
      */
     public function searchByModel($manufacturerSlug, $modelSlug, $year, $force = false)
     {
-        $endpoint = $this->apiEndpoint . "search/by_model/?make={$manufacturerSlug}&model={$modelSlug}&year={$year}&"
-            . $this->getUserKey();
+        $endpoint = $this->requestFormatter->getSearchUrl($manufacturerSlug, $modelSlug, $year);
         $key = self::SEARCH_MODEL_CACHE_KEY . $manufacturerSlug . '_' . $modelSlug . '_' . $year;
 
         return $this->getData($key, $endpoint, $force);
@@ -101,6 +108,7 @@ class Client
 
     /**
      * @param string $url
+     *
      * @return array
      */
     public function request($url)
@@ -120,13 +128,14 @@ class Client
     /**
      * @param string $cacheKey
      * @param string $endpoint
-     * @param bool $force
+     * @param bool   $force
+     *
      * @return array|\stdClass
      */
     protected function getData($cacheKey, $endpoint, $force = false)
     {
         $data = $this->request($endpoint);
-        $this->cacheProvider->set($key, $data);
+        $this->cacheProvider->set($cacheKey, $data);
 
         return $data;
     }
@@ -134,6 +143,7 @@ class Client
     /**
      * @param string $manufacturer
      * @param string $model
+     *
      * @return array
      */
     public function getModelYears($manufacturer, $model)
@@ -160,7 +170,7 @@ class Client
     {
         $key = self::ENGINE_CACHE_KEY . $manufacturer . '_' . $model;
         if ($this->cacheProvider && $this->cacheProvider->has($key)) {
-            $data =  $this->cacheProvider->get($key);
+            $data = $this->cacheProvider->get($key);
         } else {
             $data = $this->parser->extractEngines($this->searchByModel($manufacturer, $model, $year));
             $this->cacheProvider->set($key, $data);
@@ -168,7 +178,7 @@ class Client
 
         $tiresKey = self::TIRES_CACHE_KEY . $manufacturer . '_' . $model . '_' . $year . '_';
         if ($this->cacheProvider && $this->cacheProvider->has($tiresKey)) {
-            $tiresData =  $this->cacheProvider->get($tiresKey);
+            $tiresData = $this->cacheProvider->get($tiresKey);
         } else {
             $tiresData = $this->parser->extractRims($this->searchByModel($manufacturer, $model, $year));
             $this->cacheProvider->set($tiresKey, $tiresData);
@@ -199,13 +209,5 @@ class Client
         $this->cacheProvider->set($key, $data);
 
         return $data;
-    }
-
-    /**
-     * @return string
-     */
-    private function getUserKey()
-    {
-        return 'user_key=' . $this->key;
     }
 }

@@ -2,14 +2,18 @@
 
 namespace Nfq\WheelSize\Parser;
 
+use Nfq\WheelSize\EnginePowerFormatter;
+
 /**
  * Class Parser
+ *
  * @package Nfq\WheelSize\Parser
  */
 class Parser
 {
     /**
      * @param \stdClass $data
+     *
      * @return array
      */
     public function extractYears($data)
@@ -26,6 +30,7 @@ class Parser
 
     /**
      * @param \stdClass $data
+     *
      * @return array
      */
     public function extractEngines($data)
@@ -36,7 +41,7 @@ class Parser
         foreach ($data as $item) {
             $results[$item->market->abbr][] = [
                 'slug' => $item->trim,
-                'name' => $item->trim . ' (' . $item->power->kW . ' kW)'
+                'name' => $item->trim . ' (' . EnginePowerFormatter::format($item->power->kW) . ' kW)'
             ];
         }
 
@@ -45,7 +50,8 @@ class Parser
 
     /**
      * @param \stdClass $data
-     * @param string $engine
+     * @param string    $engine
+     *
      * @return array
      */
     public function extractRims($data, $engine = '')
@@ -66,7 +72,7 @@ class Parser
 
                     $results[$key] = [
                         'name' => $name,
-                        'slug'  => $key,
+                        'slug' => $key,
                         'isMain' => $wheel->is_stock
                     ];
                 }
